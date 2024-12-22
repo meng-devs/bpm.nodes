@@ -31,8 +31,4 @@ edges:
     type: number
 
 source: |
-  ${SETUP.{
-      -- Initialize the random number generator
-      math.randomseed(os.time())
-  }}
-  return min + math.random() * (max - min)
+  ${OUTPUT.result = Random.nextDouble(min, max)}

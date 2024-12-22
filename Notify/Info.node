@@ -22,7 +22,7 @@ edges:
   exec_out:
     description: 'The output execution flow'
     direction: output
-    type: exec
+    type:
 
 source: |
   Notify:message(message, 3, "#22D8C9F5", "Info", "INFO")

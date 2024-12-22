@@ -15,3 +15,5 @@ edges:
     description: "Boolean value"
     type: boolean
     direction: output
+source: |
+  ${OUTPUT.value = input}

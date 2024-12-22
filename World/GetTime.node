@@ -16,5 +16,5 @@ edges:
     type: number
 
 source: |
-  local currentTime = world.getTime()
+  local currentTime = World:getTimeOfDay()
   ${OUTPUT.time = currentTime}
