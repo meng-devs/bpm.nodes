@@ -1,34 +1,91 @@
-description: "Adds an element to the end of an array"
+description: "Adds one or more elements to the end of an array"
 group: Array
 name: Push
 extends: Array/Array
 
 edges:
   array:
-    description: 'The array to push to'
+    description: 'The array to add to'
     direction: input
     type: list
+    required: true
   value:
-    description: 'The value to push'
+    description: 'Primary value to add'
     direction: input
     type: any
-  exec_in:
-    description: 'Execute the push'
+    required: true
+  value2:
+    description: 'Second value to add (optional)'
     direction: input
-    type: exec
-  result:
-    description: 'The modified array'
+    type: any
+  value3:
+    description: 'Third value to add (optional)'
+    direction: input
+    type: any
+  index:
+    description: 'Index to insert at (nil for end of array)'
+    direction: input
+    type: number
+  new_length:
+    description: 'New length after adding elements'
     direction: output
-    type: list
-  exec_out:
-    description: 'Execution complete'
+    type: number
+  added_count:
+    description: 'Number of elements added'
     direction: output
-    type: exec
+    type: number
 
 source: |
-  if type(array) ~= "table" then
-    array = {}
+  -- Ensure input is a table
+  local arr = array
+  if type(arr) ~= "table" then
+    arr = {}
   end
-  table.insert(array, value)
-  ${OUTPUT.result = array}
-  ${EXEC.exec_out} 
+  
+  -- Track original length and how many items we add
+  local original_length = #arr
+  local items_added = 0
+  
+  -- Handle specific index insertion
+  local insertion_index = index
+  local insert_at_end = insertion_index == nil
+  
+  -- Add the primary value (always required)
+  if insert_at_end then
+    table.insert(arr, value)
+  else
+    table.insert(arr, insertion_index, value)
+  end
+  items_added = items_added + 1
+  
+  -- Add optional values if provided
+  if value2 ~= nil then
+    if insert_at_end then
+      table.insert(arr, value2)
+    else
+      table.insert(arr, insertion_index + items_added, value2)
+    end
+    items_added = items_added + 1
+  end
+  
+  if value3 ~= nil then
+    if insert_at_end then
+      table.insert(arr, value3)
+    else
+      table.insert(arr, insertion_index + items_added, value3)
+    end
+    items_added = items_added + 1
+  end
+  
+  -- Calculate new length
+  local new_length = #arr
+  
+  -- Set all outputs
+  ${OUTPUT.result = arr}
+  ${OUTPUT.length = new_length}
+  ${OUTPUT.is_empty = new_length == 0}
+  ${OUTPUT.new_length = new_length}
+  ${OUTPUT.added_count = items_added}
+  
+  -- Continue execution
+  ${EXEC.exec_out}

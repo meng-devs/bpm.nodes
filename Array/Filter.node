@@ -1,0 +1,76 @@
+description: "Creates a new array with elements that pass a test"
+group: Array
+name: Filter
+extends: Array/Array
+
+edges:
+  array:
+    description: 'The array to filter'
+    direction: input
+    type: list
+    required: true
+  predicate:
+    description: 'Function that returns true to keep an element'
+    direction: input
+    type: exec
+    required: true
+  element:
+    description: 'Current element being evaluated'
+    direction: output
+    type: any
+  index:
+    description: 'Index of current element'
+    direction: output
+    type: number
+  keep:
+    description: 'Set to true in predicate function to keep element'
+    direction: input
+    type: boolean
+  filtered:
+    description: 'Array with elements that passed the test'
+    direction: output
+    type: list
+  matched_count:
+    description: 'Number of elements that passed the test'
+    direction: output
+    type: number
+
+source: |
+  -- Ensure input is a table
+  local arr = array
+  if type(arr) ~= "table" then
+    arr = {}
+  end
+  
+  -- Create a new array for the results
+  local result_array = {}
+  local matches = 0
+  
+  -- Process each element through the predicate function
+  for i, element in ipairs(arr) do
+    -- Set current element and index
+    ${OUTPUT.element = element}
+    ${OUTPUT.index = i}
+    
+    -- Assume we don't keep the element by default
+    variables["keep_element"] = false
+    
+    -- Call predicate function for this element
+    ${EXEC.predicate}
+    
+    -- Check if the predicate marked this element to be kept
+    if keep == true or variables["keep_element"] == true then
+      table.insert(result_array, element)
+      matches = matches + 1
+    end
+  end
+  
+  -- Set outputs
+  ${OUTPUT.result = arr}         -- Original array (unchanged)
+  ${OUTPUT.filtered = result_array} -- Filtered array
+  ${OUTPUT.length = #arr}        -- Length of original array
+  ${OUTPUT.is_empty = #arr == 0} -- Is original array empty
+  ${OUTPUT.matched_count = matches} -- Number of elements that passed
+  
+  -- Continue execution
+  ${EXEC.exec_out}

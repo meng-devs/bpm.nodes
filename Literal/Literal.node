@@ -1,10 +1,16 @@
-description: "Base node for literal values"
+description: "Base node for all constant and literal value types"
 group: Literal
 name: Literal
 extends: Base/Node
 
+edges:
+  value:
+    description: 'The literal value output'
+    direction: output
+    type: any
+
 theme:
   color: '#FFC107'
   height: 40
-  width: 80
-  icon: 0xf1c0
+  width: 100
+  icon: 0xf15c  # Document icon

@@ -1,33 +1,79 @@
-# Concatenate.node
-description: "Concatenates two strings"
+description: "Combines multiple strings into a single string"
 group: String
 name: Concatenate
-extends: Base/Node
+extends: String/String
 
 theme:
-  color: '#3366cc'
-  width: 160
-  height: 60
-  icon: 0xe55f
+  icon: 0xf0c7  # Link/chain icon
+
 edges:
   string_a:
-    description: 'The first string'
+    description: 'First string'
+    direction: input
+    type: string
+    required: true
+    value:
+      type: string
+      default: ""
+  string_b:
+    description: 'Second string'
+    direction: input
+    type: string
+    required: true
+    value:
+      type: string
+      default: ""
+  separator:
+    description: 'Text to insert between strings (optional)'
     direction: input
     type: string
     value:
       type: string
       default: ""
-  string_b:
-    description: 'The second string'
+  string_c:
+    description: 'Third string (optional)'
+    direction: input
+    type: string
+    value:
+      type: string
+      default: ""
+  string_d:
+    description: 'Fourth string (optional)'
     direction: input
     type: string
     value:
       type: string
       default: ""
   result:
-    description: 'The concatenated string'
+    description: 'The combined string'
     direction: output
     type: string
+  length:
+    description: 'Length of the resulting string'
+    direction: output
+    type: number
 
 source: |
-   ${OUTPUT.result = string_a .. string_b}
+  -- Convert any non-string inputs to strings
+  local str_a = tostring(string_a or "")
+  local str_b = tostring(string_b or "")
+  local str_c = tostring(string_c or "")
+  local str_d = tostring(string_d or "")
+  local sep = tostring(separator or "")
+  
+  -- Build result array to handle optional parts
+  local parts = {}
+  
+  -- Add non-empty strings to parts array
+  if str_a ~= "" then table.insert(parts, str_a) end
+  if str_b ~= "" then table.insert(parts, str_b) end
+  if str_c ~= "" then table.insert(parts, str_c) end
+  if str_d ~= "" then table.insert(parts, str_d) end
+  
+  -- Join with separator and output
+  local result = table.concat(parts, sep)
+  ${OUTPUT.result = result}
+  ${OUTPUT.length = string.len(result)}
+  
+  -- Continue execution
+  ${EXEC.exec_out}

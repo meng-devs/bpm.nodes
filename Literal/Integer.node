@@ -1,19 +1,40 @@
-description: "Represents an integer literal"
+description: "Provides a constant integer value (whole number)"
 group: Literal
 name: Integer
 extends: Literal/Literal
 
 edges:
   input:
-    description: "Integer input"
+    description: "Integer value to output"
     type: number
     direction: input
     value:
       type: int
       default: 0
-  value:
-    description: "Integer value"
+  is_negative:
+    description: "True if the value is negative"
+    type: boolean
+    direction: output
+  is_zero:
+    description: "True if the value is zero"
+    type: boolean
+    direction: output
+  absolute:
+    description: "Absolute value (without sign)"
     type: number
     direction: output
+
 source: |
-  ${OUTPUT.value = math.floor(input)}
+  -- Ensure integer by using math.floor
+  local integer_value = math.floor(input)
+  
+  -- Calculate derived values
+  local is_negative = integer_value < 0
+  local is_zero = integer_value == 0
+  local absolute_value = math.abs(integer_value)
+  
+  -- Output all values
+  ${OUTPUT.value = integer_value}
+  ${OUTPUT.is_negative = is_negative}
+  ${OUTPUT.is_zero = is_zero}
+  ${OUTPUT.absolute = absolute_value}

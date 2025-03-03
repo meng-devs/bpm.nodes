@@ -1,53 +1,158 @@
-# Concatenate.node
-description: "Concatenates two strings"
+description: "Converts any value to a string representation"
 group: String
-name: To String
-extends: Base/Node
+name: ToString
+extends: String/String
 
 theme:
-  color: '#3366cc'
-  icon: 0xf658
-  height: 40
-  width: 100
+  icon: 0xf4a4  # Message/comment icon
+
 edges:
   value:
-    description: 'The value'
+    description: 'The value to convert to string'
     direction: input
     type: any
+    required: true
+  format:
+    description: 'Format style for complex objects (simple, json, pretty)'
+    direction: input
+    type: string
+    value:
+      type: string
+      default: "pretty"
+      enum: ["simple", "json", "pretty"]
   result:
-    description: 'The string'
+    description: 'The string representation'
+    direction: output
+    type: string
+  length:
+    description: 'Length of the resulting string'
+    direction: output
+    type: number
+  type:
+    description: 'The original data type'
     direction: output
     type: string
 
 source: |
-  local function dump(o, indent)
-    if type(o) ~= 'table' then
-      return tostring(o)
-    end
+  -- Determine original type
+  local val_type = type(value)
+  ${OUTPUT.type = val_type}
   
-    indent = indent or ""
-    local inner_indent = indent .. "  "
-    local parts = {}
-    local is_array = #o > 0  -- Check if the table is array-like
-    local i = 1
+  -- Convert to string based on format and type
+  local result = ""
   
-    for k, v in pairs(o) do
-      local part = inner_indent
-      if is_array and type(k) == 'number' and k == i then
-        -- For array-like tables, just output the value
-        part = part .. dump(v, inner_indent)
-        i = i + 1
-      else
-        -- For associative tables or mixed tables, output the key
-        if type(k) ~= 'number' then
-          k = string.format("%q", k)  -- Properly quote string keys
+  -- Simple conversion for primitive types
+  if val_type ~= 'table' then
+    result = tostring(value)
+  else
+    -- For tables, apply the chosen formatting
+    local format_type = format or "pretty"
+    
+    if format_type == "simple" then
+      -- Simple table representation
+      result = tostring(value)
+    
+    elseif format_type == "json" then
+      -- JSON-like format (more compact)
+      local json_parts = {}
+      local is_array = true
+      local max_index = 0
+      
+      -- Check if table is array-like
+      for k, _ in pairs(value) do
+        if type(k) ~= "number" or k <= 0 or math.floor(k) ~= k then
+          is_array = false
+          break
         end
-        part = part .. "[" .. k .. "] = " .. dump(v, inner_indent)
+        max_index = math.max(max_index, k)
       end
-      table.insert(parts, part)
+      
+      is_array = is_array and max_index == #value
+      
+      if is_array then
+        -- Array format
+        table.insert(json_parts, "[")
+        for i, v in ipairs(value) do
+          if type(v) == "string" then
+            table.insert(json_parts, string.format("%q", v))
+          else
+            table.insert(json_parts, tostring(v))
+          end
+          if i < #value then
+            table.insert(json_parts, ", ")
+          end
+        end
+        table.insert(json_parts, "]")
+      else
+        -- Object format
+        table.insert(json_parts, "{")
+        local first = true
+        for k, v in pairs(value) do
+          if not first then
+            table.insert(json_parts, ", ")
+          end
+          first = false
+          
+          if type(k) == "string" then
+            table.insert(json_parts, string.format("%q: ", k))
+          else
+            table.insert(json_parts, tostring(k) .. ": ")
+          end
+          
+          if type(v) == "string" then
+            table.insert(json_parts, string.format("%q", v))
+          else
+            table.insert(json_parts, tostring(v))
+          end
+        end
+        table.insert(json_parts, "}")
+      end
+      
+      result = table.concat(json_parts)
+    
+    else -- "pretty" format (default)
+      -- Pretty formatting with indentation
+      local function dump(o, indent)
+        if type(o) ~= 'table' then
+          if type(o) == "string" then
+            return string.format("%q", o)
+          else
+            return tostring(o)
+          end
+        end
+        
+        indent = indent or ""
+        local inner_indent = indent .. "  "
+        local parts = {}
+        local is_array = #o > 0  -- Check if the table is array-like
+        local i = 1
+        
+        for k, v in pairs(o) do
+          local part = inner_indent
+          if is_array and type(k) == 'number' and k == i then
+            -- For array-like tables, just output the value
+            part = part .. dump(v, inner_indent)
+            i = i + 1
+          else
+            -- For associative tables or mixed tables, output the key
+            if type(k) ~= 'number' then
+              k = string.format("%q", k)  -- Properly quote string keys
+            end
+            part = part .. "[" .. k .. "] = " .. dump(v, inner_indent)
+          end
+          table.insert(parts, part)
+        end
+        
+        return "{\n" .. table.concat(parts, ",\n") .. "\n" .. indent .. "}"
+      end
+      
+      result = dump(value)
     end
-  
-    return "{\n" .. table.concat(parts, ",\n") .. "\n" .. indent .. "}"
   end
-
-  ${OUTPUT.result = dump(value)}
+  
+  -- Calculate length and set output
+  ${OUTPUT.result = result}
+  ${OUTPUT.length = string.len(result)}
+  
+  -- Continue execution
+  ${EXEC.exec_out}

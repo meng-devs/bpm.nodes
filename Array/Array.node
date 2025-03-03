@@ -1,4 +1,4 @@
-description: "Base node for array operations"
+description: "Base node for all array and table operations"
 group: Array
 name: Array
 extends: Base/Node
@@ -6,8 +6,8 @@ extends: Base/Node
 theme:
   color: '#FF9800'
   height: 60
-  width: 120
-  icon: 0xf0cb
+  width: 140
+  icon: 0xf0cb  # List icon
 
 edges:
   array:
@@ -17,4 +17,38 @@ edges:
   result:
     description: 'The resulting array'
     direction: output
-    type: list 
+    type: list
+  length:
+    description: 'Number of elements in the array'
+    direction: output
+    type: number
+  is_empty:
+    description: 'True if the array has no elements'
+    direction: output
+    type: boolean
+  exec_in:
+    description: 'Execution input'
+    direction: input
+    type: exec
+  exec_out:
+    description: 'Execution output'
+    direction: output
+    type: exec
+
+source: |
+  -- Ensure input is a table
+  local arr = array
+  if type(arr) ~= "table" then
+    arr = {}
+  end
+  
+  -- Calculate array properties
+  local len = #arr
+  
+  -- Set outputs
+  ${OUTPUT.result = arr}
+  ${OUTPUT.length = len}
+  ${OUTPUT.is_empty = len == 0}
+  
+  -- Continue execution
+  ${EXEC.exec_out}

@@ -4,15 +4,34 @@ name: Sqrt
 extends: Math/Math
 
 edges:
-  number:
+  value:
     description: 'The number to calculate the square root of'
     direction: input
     type: number
+    required: true
   result:
     description: 'The square root of the number'
     direction: output
     type: number
+  is_imaginary:
+    description: 'True if the input is negative (imaginary result)'
+    direction: output
+    type: boolean
 
 source: |
-  ${OUTPUT.result = math.sqrt(number)}
+  local input_value = value or 0
+  local is_negative = input_value < 0
+  
+  -- Handle negative inputs (return absolute value sqrt)
+  if is_negative then
+    ${OUTPUT.result = math.sqrt(math.abs(input_value))}
+  else
+    ${OUTPUT.result = math.sqrt(input_value)}
+  end
+  
+  -- Indicate if the result is imaginary (negative input)
+  ${OUTPUT.is_imaginary = is_negative}
+  
+  -- Continue execution
+  ${EXEC.exec_out}
 

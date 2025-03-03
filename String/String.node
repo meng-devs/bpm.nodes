@@ -1,6 +1,6 @@
-description: "Base node for all mathematical operations and functions"
-group: Math
-name: Math
+description: "Base node for all string manipulation operations"
+group: String
+name: String
 extends: Base/Node
 
 edges:
@@ -14,7 +14,7 @@ edges:
     type: exec
 
 theme:
-  color: '#E91E63'
-  width: 120
+  color: '#3366CC'
+  width: 140
   height: 60
-  icon: 0xf1ec  # Calculator icon
+  icon: 0xf035  # Text-width icon
