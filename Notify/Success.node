@@ -1,31 +1,38 @@
-# Notification.node
-description: "Shows an info notification message."
+description: "Shows a success notification message"
 group: Notify
 name: Success
-extends: Base/Node
+extends: Notify/Notification
 
 theme:
-  color: '#18CE18'
-  height: 60
-  width: 100
-  icon: 0xf27a
-
-edges:
-  exec_in:
-    description: 'The input execution flow'
-    direction: input
-    type: exec
-  message:
-    description: 'The message to print.'
-    direction: input
-    type: string
-  exec_out:
-    description: 'The output execution flow'
-    direction: output
-    type: exec
+  color: '#4CAF50'
+  icon: 0xf058  # Check-circle icon
 
 source: |
-  local length = string.len(message)
-  local time = length * 0.5
-  Notify:message(message, time, "#18CE18f8", "Success", "SUCCESS")
+  -- Force success type
+  type = "success"
+  title = title or "Success"
+  
+  -- Use parent implementation
+  local msg = message or ""
+  if msg == "" then
+    msg = "(Empty success notification)"
+  end
+  
+  -- Get the notification type
+  local notification_type = "SUCCESS"
+  
+  -- Get optional title
+  local header = title or "Success"
+  
+  -- Calculate duration based on message length
+  local length = string.len(msg)
+  local time = math.max(2.0, math.min(5.0, length * 0.05))
+  
+  -- Set color
+  local color = "#4CAF50F5"
+  
+  -- Send the notification
+  Notify:message(msg, time, color, header, notification_type)
+  
+  -- Continue execution
   ${EXEC.exec_out}

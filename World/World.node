@@ -1,10 +1,42 @@
-description: "Base node for server-side world interactions"
+description: "Base node for all game world interactions and environment access"
 group: World
 name: World
 extends: Base/Node
 
+edges:
+  exec_in:
+    description: 'Execution input'
+    direction: input
+    type: exec
+  exec_out:
+    description: 'Execution output'
+    direction: output
+    type: exec
+  workspace_id:
+    description: 'Current workspace ID (UUID)'
+    direction: output
+    type: string
+  game_time:
+    description: 'Current game time in ticks'
+    direction: output
+    type: number
+
 theme:
   color: '#8BC34A'
-  height: 60
-  width: 120
-  icon: 0xf0ac
+  height: 70
+  width: 140
+  icon: 0xf0ac  # Globe icon
+
+source: |
+  -- Get the current workspace ID from runtime context
+  local workspace = WORKSPACE_ID or "unknown"
+  
+  -- Get the current game time
+  local time = World:getTimeOfDay() or 0
+  
+  -- Output values
+  ${OUTPUT.workspace_id = workspace}
+  ${OUTPUT.game_time = time}
+  
+  -- Continue execution
+  ${EXEC.exec_out}

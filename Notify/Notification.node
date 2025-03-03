@@ -1,0 +1,75 @@
+description: "Base node for all notification and messaging systems"
+group: Notify
+name: Notification
+extends: Base/Node
+
+edges:
+  exec_in:
+    description: 'Execution input'
+    direction: input
+    type: exec
+  exec_out:
+    description: 'Execution output'
+    direction: output
+    type: exec
+  message:
+    description: 'The message text to display'
+    direction: input
+    type: string
+    required: true
+  duration:
+    description: 'How long to show the notification (seconds)'
+    direction: input
+    type: number
+    value:
+      type: float
+      default: 3.0
+  title:
+    description: 'Optional title text for the notification'
+    direction: input
+    type: string
+  type:
+    description: 'Notification type (info, success, warning, error)'
+    direction: input
+    type: string
+    value:
+      type: string
+      default: "info"
+      enum: ["info", "success", "warning", "error"]
+
+theme:
+  color: '#607D8B'
+  height: 80
+  width: 160
+  icon: 0xf075  # Comment/notification icon
+
+source: |
+  -- Get the message text (required)
+  local msg = message or ""
+  if msg == "" then
+    msg = "(Empty notification)"
+  end
+  
+  -- Get the notification type
+  local notification_type = string.upper(type or "INFO")
+  
+  -- Get optional title
+  local header = title or "Notification"
+  
+  -- Get duration
+  local time = duration or 3.0
+  
+  -- Default color based on type
+  local colors = {
+    INFO = "#3366CCF5",
+    SUCCESS = "#4CAF50F5",
+    WARNING = "#FFA000F5",
+    ERROR = "#F44336F5"
+  }
+  local color = colors[notification_type] or colors.INFO
+  
+  -- Send the notification
+  Notify:message(msg, time, color, header, notification_type)
+  
+  -- Continue execution
+  ${EXEC.exec_out}

@@ -1,0 +1,58 @@
+description: "Logs a message to the console without showing a notification"
+group: Notify
+name: Logger
+extends: Base/Node
+
+edges:
+  exec_in:
+    description: 'Execution input'
+    direction: input
+    type: exec
+  exec_out:
+    description: 'Execution output'
+    direction: output
+    type: exec
+  message:
+    description: 'The message text to log'
+    direction: input
+    type: string
+    required: true
+  level:
+    description: 'Log level (debug, info, warning, error)'
+    direction: input
+    type: string
+    value:
+      type: string
+      default: "info"
+      enum: ["debug", "info", "warning", "error"]
+  prefix:
+    description: 'Optional prefix for the log message'
+    direction: input
+    type: string
+
+theme:
+  color: '#607D8B'
+  height: 60
+  width: 140
+  icon: 0xf0f6  # File-text icon
+
+source: |
+  -- Get the message text (required)
+  local msg = message or ""
+  if msg == "" then
+    msg = "(Empty log message)"
+  end
+  
+  -- Get the log level
+  local log_level = string.upper(level or "INFO")
+  
+  -- Add prefix if provided
+  if prefix and prefix ~= "" then
+    msg = prefix .. ": " .. msg
+  end
+  
+  -- Send to console
+  World:print(msg)
+  
+  -- Continue execution
+  ${EXEC.exec_out}
