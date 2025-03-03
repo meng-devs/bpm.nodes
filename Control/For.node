@@ -1,38 +1,78 @@
-description: "Executes a block of code for a specified range of values"
+description: "Executes a block of code for a specified range of numeric values"
 group: Control
 name: For
 extends: Control/IterationControl
 
 edges:
-  initial:
-    description: 'The starting value of the iteration'
+  start:
+    description: 'Starting value of the iteration (inclusive)'
+    direction: input
+    type: number
+    required: true
+    value:
+      type: number
+      default: 0
+  end:
+    description: 'Ending value of the iteration (inclusive)'
+    direction: input
+    type: number
+    required: true
+    value:
+      type: number
+      default: 10
+  step:
+    description: 'Step size for each iteration (can be negative)'
     direction: input
     type: number
     value:
-      type: int
-      default: 1
-  target:
-    description: 'The ending value of the iteration'
-    direction: input
-    type: number
-    value:
-      type: int
-      default: 1
-  increment:
-    description: 'The step value for each iteration'
-    direction: input
-    type: number
-    value:
-      type: int
+      type: number
       default: 1
   index:
-    description: 'The current index in the iteration'
+    description: 'Current loop index value'
     direction: output
     type: number
+
 source: |
-  for i = initial, target, increment do
-      ${OUTPUT.current_value = i}
+  -- Default step to 1 if not provided
+  local step_value = step or 1
+  if step_value == 0 then step_value = 1 end
+  
+  -- Initialize tracking variables
+  local counter = 0
+  local completed = true
+  
+  -- Determine if this is an ascending or descending loop
+  local ascending = step_value > 0
+  
+  -- Run the loop
+  for i = start, end, step_value do
+      counter = counter + 1
+      
+      -- Set outputs for this iteration
       ${OUTPUT.index = i}
+      ${OUTPUT.current_value = i}
+      ${OUTPUT.iteration_count = counter}
+      ${OUTPUT.is_first_iteration = counter == 1}
+      
+      -- Check for break flag
+      if variables["__break_loop"] == true then
+          variables["__break_loop"] = nil
+          completed = false
+          break
+      end
+      
+      -- Execute the iteration
       ${EXEC.on_iteration}
+      
+      -- Check for continue flag
+      if variables["__continue_loop"] == true then
+          variables["__continue_loop"] = nil
+      end
   end
+  
+  -- Set completion status
+  ${OUTPUT.completed = completed}
+  ${OUTPUT.iteration_count = counter}
+  
+  -- Continue main execution
   ${EXEC.exec_out}

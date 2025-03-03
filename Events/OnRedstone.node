@@ -1,40 +1,63 @@
-# OnRun.node
-description: "Calls the output execution flow if the location has redstone power."
+description: "Detects and responds to redstone signal changes at a specific location"
 group: Events
 name: Redstone
 extends: Events/Event
 
 edges:
   pos:
-    description: 'The location to check for redstone power.'
+    description: 'Block position to monitor for redstone signals'
     direction: input
     type: vec3i
+    required: true
   on:
-    description: 'Called once when the location has redstone power.'
+    description: 'Triggered when redstone signal turns on or increases'
     direction: output
     type: exec
   off:
-    description: 'Called once when the location has no redstone power.'
+    description: 'Triggered when redstone signal turns off or decreases'
     direction: output
     type: exec
   level:
-    description: 'The redstone power level at the location.'
+    description: 'Current redstone power level (0-15)'
     direction: output
     type: number
+  changed:
+    description: 'True if the power level changed this tick'
+    direction: output
+    type: boolean
+
 source: |
+  -- Create a position key for tracking multiple positions
+  local pos_key = string.format("%d,%d,%d", pos.x, pos.y, pos.z)
+  
+  -- Get current power level at position
   local power = World:signalAt(pos.x, pos.y, pos.z)
-  -- Should probably use a hash of the position as the key
-  if variables["power"] == nil then
-      variables["power"] = 0
+  
+  -- Initialize if first run
+  if variables[pos_key] == nil then
+      variables[pos_key] = power
+      ${OUTPUT.level = power}
+      ${OUTPUT.changed = false}
       return
   end
-  if power ~= variables["power"] then
-      variables["power"] = power
-      if power > 0 then
+  
+  -- Check if power changed
+  local previous = variables[pos_key]
+  local changed = power ~= previous
+  variables[pos_key] = power
+  
+  -- Execute appropriate outputs
+  if changed then
+      ${OUTPUT.changed = true}
+      if power > previous then
           ${EXEC.on}
-      else 
+      else
           ${EXEC.off}
       end
+  else
+      ${OUTPUT.changed = false}
   end
+  
+  -- Always output current level and continue main execution
   ${OUTPUT.level = power}
   ${EXEC.exec_out}

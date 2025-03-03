@@ -1,4 +1,4 @@
-description: 'The base node for all nodes that can be used in a workflow.'
+description: 'The foundational node from which all other nodes derive.'
 group: Base
 name: Node
 
@@ -6,3 +6,4 @@ theme:
   color: '#946ee0'
   width: 120
   height: 80
+  icon: 0xf0c8  # Square icon

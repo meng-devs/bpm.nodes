@@ -1,4 +1,4 @@
-description: "Base node for binary operations"
+description: "Base node for operations that take two inputs (binary operations)"
 group: Binary
 name: Binary
 extends: Base/Node
@@ -8,17 +8,32 @@ edges:
     description: 'Left operand'
     direction: input
     type: any
+    required: true
   right:
     description: 'Right operand'
     direction: input
     type: any
+    required: true
   result:
     description: 'Result of the binary operation'
     direction: output
     type: any
+  exec_in:
+    description: 'Execution input'
+    direction: input
+    type: exec
+  exec_out:
+    description: 'Execution output'
+    direction: output
+    type: exec
 
 theme:
   color: '#4CAF50'
   height: 60
   width: 100
-  icon: 0xf1ec
+  icon: 0xf1ec  # Calculator icon
+
+source: |
+  -- This is the base binary operation node
+  -- Child nodes will override with specific implementations
+  ${EXEC.exec_out}

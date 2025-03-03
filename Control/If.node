@@ -1,25 +1,40 @@
-description: "Conditional branching control structure"
+description: "Executes one of two paths based on a boolean condition"
 group: Control
 name: If
 extends: Control/Control
 
 edges:
   condition:
-    description: 'The condition to evaluate'
+    description: 'Boolean condition to evaluate'
     direction: input
     type: boolean
+    required: true
+  result:
+    description: 'The result of the condition evaluation'
+    direction: output
+    type: boolean
   true_branch:
-    description: 'Executed if the condition is true'
+    description: 'Execution path if condition is true'
     direction: output
     type: exec
   false_branch:
-    description: 'Executed if the condition is false'
+    description: 'Execution path if condition is false'
     direction: output
     type: exec
+
 source: |
-  if condition then
+  -- Evaluate the condition
+  local result = condition == true
+  
+  -- Output the result
+  ${OUTPUT.result = result}
+  
+  -- Branch based on the condition
+  if result then
       ${EXEC.true_branch}
   else
       ${EXEC.false_branch}
   end
+  
+  -- Continue main execution flow
   ${EXEC.exec_out}

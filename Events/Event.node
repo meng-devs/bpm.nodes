@@ -1,15 +1,16 @@
-description: 'The base node for all nodes that can be used in a workflow.'
+description: 'Base node for all event-triggered nodes. Events initiate execution flow.'
 group: Events
 name: Event
+extends: Base/Node
 
 theme:
   color: '#b3281e'
   width: 120
   height: 40
-  icon: 0xf6ff
+  icon: 0xf6ff  # Event icon
 
 edges:
   exec_out:
-    description: 'The output of the execution.'
+    description: 'Execution output path triggered when the event occurs.'
     type: exec
     direction: output

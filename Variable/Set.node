@@ -1,12 +1,17 @@
-description: "Sets the value of a variable"
+description: "Sets the value of a variable and provides the value as output"
 group: Variable
 name: Set
 extends: Variable/Variable
 
 edges:
   value:
-    description: 'Value to set'
+    description: 'Value to store in the variable'
     direction: input
+    type: any
+    required: true
+  output:
+    description: 'The value that was stored (pass-through)'
+    direction: output
     type: any
   exec_in:
     description: 'Execution input'
@@ -18,5 +23,14 @@ edges:
     type: exec
 
 source: |
-  variables[name] = value
+  -- Determine storage based on scope
+  local storage = scope == "global" and global_variables or variables
+  
+  -- Store the value
+  storage[name] = value
+  
+  -- Output the value (pass-through)
+  ${OUTPUT.output = value}
+  
+  -- Continue execution
   ${EXEC.exec_out}

@@ -1,13 +1,40 @@
-description: "Retrieves the value of a variable"
+description: "Retrieves the value of a variable with optional default value"
 group: Variable
 name: Get
 extends: Variable/Variable
 
 edges:
+  default_value:
+    description: 'Default value if the variable is not defined'
+    direction: input
+    type: any
   value:
-    description: 'Variable value'
+    description: 'The retrieved variable value'
     direction: output
     type: any
+  exists:
+    description: 'True if the variable exists, false otherwise'
+    direction: output
+    type: boolean
+  exec_in:
+    description: 'Execution input'
+    direction: input
+    type: exec
+  exec_out:
+    description: 'Execution output'
+    direction: output
+    type: exec
 
 source: |
-  ${OUTPUT.value = variables[name]}
+  -- Determine storage based on scope
+  local storage = scope == "global" and global_variables or variables
+  
+  -- Check if the variable exists
+  local variable_exists = storage[name] ~= nil
+  ${OUTPUT.exists = variable_exists}
+  
+  -- Get the value or use default
+  ${OUTPUT.value = variable_exists and storage[name] or default_value}
+  
+  -- Continue execution
+  ${EXEC.exec_out}

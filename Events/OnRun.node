@@ -1,8 +1,20 @@
-# OnRun.node
-description: "Called once after compilation."
+description: "Called once when the program starts or is recompiled"
 group: Events
 name: Run
 extends: Events/Event
 
+edges:
+  timestamp:
+    description: "Start timestamp in milliseconds"
+    type: number
+    direction: output
+
 source: |
+  -- Get current time in milliseconds
+  local start_time = os.time() * 1000
+  
+  -- Output start timestamp
+  ${OUTPUT.timestamp = start_time}
+  
+  -- Begin execution flow
   ${EXEC.exec_out}

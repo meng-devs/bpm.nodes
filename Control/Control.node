@@ -1,19 +1,20 @@
-description: "Does the exec_out for each element in the list"
+description: "Base node for all control flow operations"
 group: Control
 name: Control
+extends: Base/Node
 
 theme:
   color: '#eb3e31'
   height: 80
   width: 140
-  icon: 0xf1c9
+  icon: 0xf1c9  # Code branch icon
 
 edges:
   exec_in:
-    description: 'Begin the control flow'
+    description: 'Execution input - begins the control flow'
     direction: input
     type: exec
   exec_out:
-    description: 'Called after the loop ends'
+    description: 'Execution output - called after the control flow completes'
     direction: output
     type: exec

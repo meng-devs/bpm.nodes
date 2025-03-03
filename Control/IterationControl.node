@@ -1,14 +1,26 @@
-description: "Base node for iteration control structures"
+description: "Base node for all iteration and loop control structures"
 group: Control
 name: IterationControl
 extends: Control/Control
 
 edges:
   on_iteration:
-    description: 'Called for each iteration'
+    description: 'Execution output called for each iteration'
     direction: output
     type: exec
   current_value:
-    description: 'The current value in the iteration'
+    description: 'The current value in the iteration (element or index)'
     direction: output
     type: any
+  iteration_count:
+    description: 'The total number of iterations performed'
+    direction: output
+    type: number
+  is_first_iteration:
+    description: 'True during the first iteration, false otherwise'
+    direction: output
+    type: boolean
+  completed:
+    description: 'True if all iterations completed normally, false if broken'
+    direction: output
+    type: boolean

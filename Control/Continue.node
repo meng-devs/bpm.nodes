@@ -1,9 +1,18 @@
-description: "Skips to the next iteration of the current loop"
+description: "Skips remaining code in current iteration and continues with next loop iteration"
 group: Control
 name: Continue
 extends: Control/Control
 
+edges:
+  exec_in:
+    description: 'Triggers the continue operation'
+    direction: input
+    type: exec
+  # No exec_out since this skips to the next iteration
+
 source: |
-  ${EXEC.exec_out}
-  return
+  -- Set the continue flag for the enclosing loop to detect
+  variables["__continue_loop"] = true
+  
+  -- No exec_out - this node terminates the current execution path
 

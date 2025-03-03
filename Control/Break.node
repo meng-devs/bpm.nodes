@@ -1,8 +1,17 @@
-description: "Breaks out of the current loop"
+description: "Immediately exits the current loop and continues execution after the loop"
 group: Control
 name: Break
 extends: Control/Control
 
+edges:
+  exec_in:
+    description: 'Triggers the break operation'
+    direction: input
+    type: exec
+  # No exec_out since this terminates the current loop iteration
+
 source: |
-  break
-  ${EXEC.exec_out}
+  -- Set the break flag for the enclosing loop to detect
+  variables["__break_loop"] = true
+  
+  -- No exec_out - this node terminates the execution path

@@ -1,14 +1,28 @@
-description: "Called once per tick (20 times per second)"
+description: "Called once per game tick (20 times per second)"
 group: Events
 name: Tick
 extends: Events/Event
 
 edges:
   tick:
-    description: "The current tick number"
+    description: "The current tick count since node activation"
     type: number
     direction: output
+  delta_time:
+    description: "Time in seconds since last tick"
+    type: number
+    direction: output
+
 source: |
+  -- Initialize or increment tick counter
   variables['tick'] = (variables['tick'] or 0) + 1
+  
+  -- Calculate delta time (approx. 0.05s per tick)
+  local delta = 0.05
+  
+  -- Output values
   ${OUTPUT.tick = variables['tick']}
+  ${OUTPUT.delta_time = delta}
+  
+  -- Continue execution
   ${EXEC.exec_out}

@@ -1,7 +1,9 @@
-description: "Adds two values"
+description: "Adds two numeric values or concatenates strings"
 group: Binary
 name: Add
 extends: Binary/Binary
 
 source: |
+  -- Add numbers or concatenate strings
   ${OUTPUT.result = left + right}
+  ${EXEC.exec_out}

@@ -1,21 +1,108 @@
-description: "Iterates over each element in a list"
+description: "Iterates over each element in an array, table, or string"
 group: Control
 name: Each
 extends: Control/IterationControl
 
 edges:
-  list:
-    description: 'The list to iterate over'
+  collection:
+    description: 'The array, table, or string to iterate over'
     direction: input
-    type: list
-  index:
-    description: 'The current index in the list'
+    type: any
+    required: true
+  key:
+    description: 'Current key or index in the iteration'
     direction: output
-    type: number
+    type: any
+  value:
+    description: 'Current value in the iteration'
+    direction: output
+    type: any
+  empty:
+    description: 'True if the collection is empty, false otherwise'
+    direction: output
+    type: boolean
+  empty_exec:
+    description: 'Executed if the collection is empty'
+    direction: output
+    type: exec
+
 source: |
-  for i, value in ipairs(list) do
-      ${OUTPUT.current_value = value}
-      ${OUTPUT.index = i}
-      ${EXEC.on_iteration}    
+  -- Initialize counters and state
+  local counter = 0
+  local completed = true
+  
+  -- Handle different collection types
+  local is_empty = true
+  local collection_type = type(collection)
+  
+  if collection_type == "table" then
+      -- For tables/arrays, use pairs to handle both indexed and keyed tables
+      for k, v in pairs(collection) do
+          is_empty = false
+          counter = counter + 1
+          
+          -- Set outputs for this iteration
+          ${OUTPUT.key = k}
+          ${OUTPUT.value = v}
+          ${OUTPUT.current_value = v}
+          ${OUTPUT.iteration_count = counter}
+          ${OUTPUT.is_first_iteration = counter == 1}
+          
+          -- Check for break
+          if variables["__break_loop"] == true then
+              variables["__break_loop"] = nil
+              completed = false
+              break
+          end
+          
+          -- Run iteration
+          ${EXEC.on_iteration}
+          
+          -- Check for continue
+          if variables["__continue_loop"] == true then
+              variables["__continue_loop"] = nil
+          end
+      end
+  elseif collection_type == "string" then
+      -- For strings, iterate over each character
+      for i = 1, string.len(collection) do
+          is_empty = false
+          counter = counter + 1
+          local char = string.sub(collection, i, i)
+          
+          -- Set outputs
+          ${OUTPUT.key = i}
+          ${OUTPUT.value = char}
+          ${OUTPUT.current_value = char}
+          ${OUTPUT.iteration_count = counter}
+          ${OUTPUT.is_first_iteration = counter == 1}
+          
+          -- Check for break
+          if variables["__break_loop"] == true then
+              variables["__break_loop"] = nil
+              completed = false
+              break
+          end
+          
+          -- Run iteration
+          ${EXEC.on_iteration}
+          
+          -- Check for continue
+          if variables["__continue_loop"] == true then
+              variables["__continue_loop"] = nil
+          end
+      end
   end
+  
+  -- Handle empty collections
+  ${OUTPUT.empty = is_empty}
+  if is_empty then
+      ${EXEC.empty_exec}
+  end
+  
+  -- Set completion status
+  ${OUTPUT.completed = completed}
+  ${OUTPUT.iteration_count = counter}
+  
+  -- Continue main execution
   ${EXEC.exec_out}
